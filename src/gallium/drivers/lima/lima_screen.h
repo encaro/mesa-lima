@@ -38,6 +38,11 @@ extern bool lima_dump_command_stream;
 
 struct ra_regs;
 
+/* screen supports non-contiguous buffers */
+#define LIMA_SCREEN_CAP_NONCONTIG_BUF (1 << 0)
+
+#define supports_noncontig(screen) (screen->caps & LIMA_SCREEN_CAP_NONCONTIG_BUF)
+
 struct lima_screen {
    struct pipe_screen base;
    struct renderonly *ro;
@@ -48,6 +53,7 @@ struct lima_screen {
    int fd;
    int gpu_type;
    int num_pp;
+   int caps;
 
    /* va mgr */
    mtx_t va_lock;
@@ -70,6 +76,6 @@ lima_screen(struct pipe_screen *pscreen)
 }
 
 struct pipe_screen *
-lima_screen_create(int fd, struct renderonly *ro);
+lima_screen_create(int fd, struct renderonly *ro, bool noncontig);
 
 #endif

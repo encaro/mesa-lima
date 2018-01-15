@@ -28,6 +28,6 @@ struct pipe_screen;
 struct renderonly;
 
 struct pipe_screen *lima_drm_screen_create(int drmFD);
-struct pipe_screen *lima_drm_screen_create_renderonly(struct renderonly *ro);
+struct pipe_screen *lima_drm_screen_create_renderonly(struct renderonly *ro, int noncontig);
 
 #endif /* __LIMA_DRM_PUBLIC_H__ */

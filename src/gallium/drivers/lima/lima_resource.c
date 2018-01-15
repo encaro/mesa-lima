@@ -72,6 +72,13 @@ lima_resource_create(struct pipe_screen *pscreen,
       util_format_get_nblocksy(pres->format, height) *
       pres->array_size * pres->depth0;
 
+   /* if templat->bind & PIPE_BIND_SCANOUT && !screen->noncontig, then force contig memory */
+   uint32_t flags = 0;
+
+   /* in scanout case, force contiguous memory if out-GPU doesn't support noncontiguous */
+   if (templat->bind & PIPE_BIND_SCANOUT && !supports_noncontig(screen))
+	   flags |= LIMA_GEM_FLAG_CONTIG;
+
    res->bo = lima_bo_create(screen, align(size, LIMA_PAGE_SIZE), 0, false, false);
    if (!res->bo)
       goto err_out0;
@@ -83,9 +90,9 @@ lima_resource_create(struct pipe_screen *pscreen,
          goto err_out1;
    }
 
-   debug_printf("%s: pres=%p width=%u height=%u depth=%u target=%d bind=%x\n",
+   debug_printf("%s: pres=%p width=%u height=%u depth=%u target=%d bind=%x bo_flags=%x\n",
                 __func__, &res->base, pres->width0, pres->height0, pres->depth0,
-                pres->target, pres->bind);
+                pres->target, pres->bind, flags);
 
    return pres;
 
@@ -163,6 +170,9 @@ lima_resource_get_handle(struct pipe_screen *pscreen,
    struct lima_screen *screen = lima_screen(pscreen);
    struct lima_resource *res = lima_resource(pres);
 
+   debug_printf("%s: pres=%p width=%u height=%u target=%d bind=%x\n",
+		   __func__, &res->base, pres->width0, pres->height0,
+		   pres->target, pres->bind);
    if (handle->type == DRM_API_HANDLE_TYPE_KMS && screen->ro &&
        renderonly_get_handle(res->scanout, handle))
       return TRUE;

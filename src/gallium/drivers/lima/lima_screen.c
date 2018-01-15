@@ -302,13 +302,16 @@ bool lima_shader_debug_gp = false;
 bool lima_shader_debug_pp = false;
 
 struct pipe_screen *
-lima_screen_create(int fd, struct renderonly *ro)
+lima_screen_create(int fd, struct renderonly *ro, bool noncontig)
 {
    struct lima_screen *screen;
 
    screen = rzalloc(NULL, struct lima_screen);
    if (!screen)
       return NULL;
+
+   if (noncontig)
+	   screen->caps |= LIMA_SCREEN_CAP_NONCONTIG_BUF;
 
    if (!lima_vamgr_init(screen))
       goto err_out0;
