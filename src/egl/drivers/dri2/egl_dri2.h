@@ -59,7 +59,7 @@ struct zwp_linux_dmabuf_v1;
 #ifdef HAVE_ANDROID_PLATFORM
 #define LOG_TAG "EGL-DRI2"
 
-#include <system/window.h>
+#include <vndk/window.h>
 #include <hardware/gralloc.h>
 #include <gralloc_drm_handle.h>
 
