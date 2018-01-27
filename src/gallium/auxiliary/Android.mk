@@ -49,6 +49,7 @@ LOCAL_CPPFLAGS += -std=c++11
 # We need libmesa_nir to get NIR's generated include directories.
 LOCAL_MODULE := libmesa_gallium
 LOCAL_STATIC_LIBRARIES += libmesa_nir
+LOCAL_SHARED_LIBRARIES += libbacktrace
 
 LOCAL_WHOLE_STATIC_LIBRARIES += cpufeatures
 LOCAL_CFLAGS += -DHAS_ANDROID_CPUFEATURES

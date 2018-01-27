@@ -175,7 +175,7 @@ droid_window_dequeue_buffer(struct dri2_egl_surface *dri2_surf)
 {
    int fence_fd;
 
-   if (dri2_surf->window->dequeueBuffer(dri2_surf->window, &dri2_surf->buffer,
+   if (ANativeWindow_dequeueBuffer(dri2_surf->window, &dri2_surf->buffer,
                                         &fence_fd))
       return EGL_FALSE;
 
@@ -261,7 +261,7 @@ droid_window_enqueue_buffer(_EGLDisplay *disp, struct dri2_egl_surface *dri2_sur
     */
    int fence_fd = dri2_surf->out_fence_fd;
    dri2_surf->out_fence_fd = -1;
-   dri2_surf->window->queueBuffer(dri2_surf->window, dri2_surf->buffer,
+   ANativeWindow_queueBuffer(dri2_surf->window, dri2_surf->buffer,
                                   fence_fd);
 
    dri2_surf->buffer->common.decRef(&dri2_surf->buffer->common);
@@ -285,7 +285,7 @@ droid_window_cancel_buffer(struct dri2_egl_surface *dri2_surf)
    int fence_fd = dri2_surf->out_fence_fd;
 
    dri2_surf->out_fence_fd = -1;
-   ret = dri2_surf->window->cancelBuffer(dri2_surf->window,
+   ret = ANativeWindow_cancelBuffer(dri2_surf->window,
                                          dri2_surf->buffer, fence_fd);
    if (ret < 0) {
       _eglLog(_EGL_WARNING, "ANativeWindow::cancelBuffer failed");
@@ -317,22 +317,25 @@ droid_create_surface(_EGLDriver *drv, _EGLDisplay *disp, EGLint type,
    if (type == EGL_WINDOW_BIT) {
       int format;
 
-      if (window->common.magic != ANDROID_NATIVE_WINDOW_MAGIC) {
+	  /* FIXME: is there an equivalent of this? */
+      /*if (window->common.magic != ANDROID_NATIVE_WINDOW_MAGIC) {
          _eglError(EGL_BAD_NATIVE_WINDOW, "droid_create_surface");
          goto cleanup_surface;
       }
-      if (window->query(window, NATIVE_WINDOW_FORMAT, &format)) {
+
+      if (ANativeWindow_query(window, 2, &format)) {
          _eglError(EGL_BAD_NATIVE_WINDOW, "droid_create_surface");
          goto cleanup_surface;
-      }
+      }*/
+      format = ANativeWindow_getFormat(window);
 
       if (format != dri2_conf->base.NativeVisualID) {
          _eglLog(_EGL_WARNING, "Native format mismatch: 0x%x != 0x%x",
                format, dri2_conf->base.NativeVisualID);
       }
 
-      window->query(window, NATIVE_WINDOW_WIDTH, &dri2_surf->base.Width);
-      window->query(window, NATIVE_WINDOW_HEIGHT, &dri2_surf->base.Height);
+      dri2_surf->base.Width = ANativeWindow_getWidth(window);
+      dri2_surf->base.Height = ANativeWindow_getHeight(window);
    }
 
    config = dri2_get_dri_config(dri2_conf, type,
@@ -353,7 +356,7 @@ droid_create_surface(_EGLDriver *drv, _EGLDisplay *disp, EGLint type,
    }
 
    if (window) {
-      window->common.incRef(&window->common);
+	   ANativeWindow_acquire(window);
       dri2_surf->window = window;
    }
 
@@ -394,7 +397,7 @@ droid_destroy_surface(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *surf)
       if (dri2_surf->buffer)
          droid_window_cancel_buffer(dri2_surf);
 
-      dri2_surf->window->common.decRef(&dri2_surf->window->common);
+      ANativeWindow_release(dri2_surf->window);
    }
 
    if (dri2_surf->dri_image_back) {
@@ -424,7 +427,7 @@ droid_swap_interval(_EGLDriver *drv, _EGLDisplay *dpy,
    struct dri2_egl_surface *dri2_surf = dri2_egl_surface(surf);
    struct ANativeWindow *window = dri2_surf->window;
 
-   if (window->setSwapInterval(window, interval))
+   if (ANativeWindow_setSwapInterval(window, interval))
       return EGL_FALSE;
 
    surf->SwapInterval = interval;
@@ -654,7 +657,9 @@ droid_swap_buffers(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *draw)
    return EGL_TRUE;
 }
 
-#if ANDROID_API_LEVEL >= 23
+/* FIXME: native_window_set_surface_damage is no longer public, 
+ * so we need an API 26 equivalent? */
+#if ANDROID_API_LEVEL >= 23 && ANDROID_API_LEVEL < 26
 static EGLBoolean
 droid_set_damage_region(_EGLDriver *drv,
                         _EGLDisplay *disp,
@@ -888,15 +893,15 @@ droid_query_surface(_EGLDriver *drv, _EGLDisplay *dpy, _EGLSurface *surf,
    switch (attribute) {
       case EGL_WIDTH:
          if (dri2_surf->base.Type == EGL_WINDOW_BIT && dri2_surf->window) {
-            dri2_surf->window->query(dri2_surf->window,
-                                     NATIVE_WINDOW_DEFAULT_WIDTH, value);
+            ANativeWindow_query(dri2_surf->window,
+                                     ANATIVEWINDOW_QUERY_DEFAULT_WIDTH, value);
             return EGL_TRUE;
          }
          break;
       case EGL_HEIGHT:
          if (dri2_surf->base.Type == EGL_WINDOW_BIT && dri2_surf->window) {
-            dri2_surf->window->query(dri2_surf->window,
-                                     NATIVE_WINDOW_DEFAULT_HEIGHT, value);
+            ANativeWindow_query(dri2_surf->window,
+                                     ANATIVEWINDOW_QUERY_DEFAULT_HEIGHT, value);
             return EGL_TRUE;
          }
          break;
@@ -1142,7 +1147,7 @@ static const struct dri2_egl_display_vtbl droid_display_vtbl = {
    .swap_buffers_with_damage = dri2_fallback_swap_buffers_with_damage, /* Android implements the function */
    .swap_buffers_region = dri2_fallback_swap_buffers_region,
    .swap_interval = droid_swap_interval,
-#if ANDROID_API_LEVEL >= 23
+#if ANDROID_API_LEVEL >= 23 && ANDROID_API_LEVEL < 26
    .set_damage_region = droid_set_damage_region,
 #else
    .set_damage_region = dri2_fallback_set_damage_region,

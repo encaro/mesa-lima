@@ -48,8 +48,12 @@ LOCAL_C_INCLUDES := \
 	$(MESA_TOP)/src/egl/drivers/dri2
 
 LOCAL_STATIC_LIBRARIES := \
+	libarect \
 	libmesa_util \
 	libmesa_loader
+
+LOCAL_HEADER_LIBRARIES := \
+	libnativebase_headers
 
 LOCAL_SHARED_LIBRARIES := \
 	libdl \
@@ -58,6 +62,7 @@ LOCAL_SHARED_LIBRARIES := \
 	liblog \
 	libcutils \
 	libgralloc_drm \
+	libnativewindow \
 	libsync
 
 ifeq ($(filter $(MESA_ANDROID_MAJOR_VERSION), 4 5 6 7),)

@@ -36,6 +36,8 @@ LOCAL_STATIC_LIBRARIES := \
 	libmesa_util \
 	libmesa_loader
 
+LOCAL_SHARED_LIBRARIES += liblog
+
 LOCAL_MODULE := libgbm
 
 LOCAL_SRC_FILES := \
