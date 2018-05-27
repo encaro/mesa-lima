@@ -39,6 +39,7 @@
 #include "lima_bo.h"
 #include "lima_util.h"
 #include "lima_drm.h"
+#include "lima_tiling.h"
 
 static struct pipe_resource *
 lima_resource_create_scanout(struct pipe_screen *pscreen,
@@ -72,6 +73,7 @@ lima_resource_create_scanout(struct pipe_screen *pscreen,
 
    struct lima_resource *res = lima_resource(pres);
    res->scanout = scanout;
+   res->tiled = false;
 
    return pres;
 }
@@ -84,10 +86,23 @@ lima_resource_create_bo(struct pipe_screen *pscreen,
    struct lima_screen *screen = lima_screen(pscreen);
    struct lima_resource *res;
    struct pipe_resource *pres;
+   bool should_tile = true;
 
    res = CALLOC_STRUCT(lima_resource);
    if (!res)
       return NULL;
+
+   /* VBOs/PBOs are untiled (and 1 height). */
+   if (templat->target == PIPE_BUFFER)
+      should_tile = false;
+
+   if (templat->bind & PIPE_BIND_LINEAR)
+      should_tile = false;
+
+   if (should_tile) {
+      width = align(width, 16);
+      height = align(height, 16);
+   }
 
    res->base = *templat;
    res->base.screen = pscreen;
@@ -95,6 +110,7 @@ lima_resource_create_bo(struct pipe_screen *pscreen,
 
    /* TODO: mipmap */
    pres = &res->base;
+   res->tiled = should_tile;
    res->stride = util_format_get_stride(pres->format, width);
 
    uint32_t size = res->stride *
@@ -340,6 +356,12 @@ lima_transfer_map(struct pipe_context *pctx,
 
    debug_printf("%s: pres=%p\n", __func__, pres);
 
+   /* No direct mappings of tiled, since we need to manually
+    * tile/untile.
+    */
+   if (res->tiled && (usage & PIPE_TRANSFER_MAP_DIRECTLY))
+      return NULL;
+
    /* use once buffers are made sure to not read/write overlapped
     * range, so no need to sync */
    if (pres->usage != PIPE_USAGE_STREAM) {
@@ -367,14 +389,32 @@ lima_transfer_map(struct pipe_context *pctx,
    ptrans->level = level;
    ptrans->usage = usage;
    ptrans->box = *box;
-   ptrans->stride = res->stride;
 
    *pptrans = ptrans;
 
-   return bo->map + box->z * ptrans->layer_stride +
-      box->y / util_format_get_blockheight(pres->format) * ptrans->stride +
-      box->x / util_format_get_blockwidth(pres->format) *
-      util_format_get_blocksize(pres->format);
+   if (res->tiled) {
+      ptrans->stride = util_format_get_stride(pres->format, ptrans->box.width);
+      ptrans->layer_stride = ptrans->stride * ptrans->box.height;
+
+      trans->staging = malloc(ptrans->stride * ptrans->box.height * ptrans->box.depth);
+
+      if (usage & PIPE_TRANSFER_READ)
+         lima_load_tiled_image(trans->staging, bo->map,
+                              &ptrans->box,
+                              ptrans->stride,
+                              res->stride,
+                              util_format_get_blocksize(pres->format));
+
+      return trans->staging;
+   } else {
+      ptrans->stride = res->stride;
+      ptrans->layer_stride = ptrans->stride * box->height;
+
+      return bo->map + box->z * ptrans->layer_stride +
+         box->y / util_format_get_blockheight(pres->format) * ptrans->stride +
+         box->x / util_format_get_blockwidth(pres->format) *
+         util_format_get_blocksize(pres->format);
+   }
 }
 
 static void
@@ -391,6 +431,20 @@ lima_transfer_unmap(struct pipe_context *pctx,
 {
    struct lima_context *ctx = lima_context(pctx);
    struct lima_transfer *trans = lima_transfer(ptrans);
+   struct lima_resource *res = lima_resource(ptrans->resource);
+   struct lima_bo *bo = res->bo;
+   struct pipe_resource *pres;
+
+   if (trans->staging) {
+      pres = &res->base;
+      if (ptrans->usage & PIPE_TRANSFER_WRITE)
+         lima_store_tiled_image(bo->map, trans->staging,
+                              &ptrans->box,
+                              res->stride,
+                              ptrans->stride,
+                              util_format_get_blocksize(pres->format));
+      free(trans->staging);
+   }
 
    pipe_resource_reference(&ptrans->resource, NULL);
    slab_free(&ctx->transfer_pool, trans);
