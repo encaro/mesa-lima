@@ -153,6 +153,12 @@ get_vertex_shader_param(struct lima_screen *screen,
                         enum pipe_shader_cap param)
 {
    switch (param) {
+   case PIPE_SHADER_CAP_MAX_INSTRUCTIONS:
+   case PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS:
+   case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
+   case PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS:
+      return 16384; /* need investigate */
+
    case PIPE_SHADER_CAP_MAX_INPUTS:
       return 16; /* attributes */
 
@@ -177,6 +183,12 @@ get_fragment_shader_param(struct lima_screen *screen,
                           enum pipe_shader_cap param)
 {
    switch (param) {
+   case PIPE_SHADER_CAP_MAX_INSTRUCTIONS:
+   case PIPE_SHADER_CAP_MAX_ALU_INSTRUCTIONS:
+   case PIPE_SHADER_CAP_MAX_TEX_INSTRUCTIONS:
+   case PIPE_SHADER_CAP_MAX_TEX_INDIRECTIONS:
+      return 16384; /* need investigate */
+
    case PIPE_SHADER_CAP_MAX_INPUTS:
       return LIMA_MAX_VARYING_NUM - 1; /* varying, minus gl_Position */
 
