@@ -281,6 +281,8 @@ lima_screen_is_format_supported(struct pipe_screen *pscreen,
       case PIPE_FORMAT_R8G8B8A8_UNORM:
       case PIPE_FORMAT_B8G8R8X8_UNORM:
       case PIPE_FORMAT_B8G8R8A8_UNORM:
+      case PIPE_FORMAT_A8B8G8R8_SRGB:
+      case PIPE_FORMAT_B8G8R8A8_SRGB:
          break;
       default:
          return FALSE;
