@@ -86,6 +86,10 @@ typedef enum {
    ppir_op_dot3,
    ppir_op_dot4,
 
+   ppir_op_and,
+   ppir_op_or,
+   ppir_op_xor,
+
    ppir_op_gt,
    ppir_op_ge,
    ppir_op_eq,

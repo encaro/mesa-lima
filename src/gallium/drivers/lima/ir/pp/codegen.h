@@ -139,6 +139,9 @@ typedef struct __attribute__((__packed__)) {
 
 typedef enum {
    ppir_codegen_vec4_mul_op_not = 0x08, /* Logical Not */
+   ppir_codegen_vec4_mul_op_and = 0x09, /* Logical AND */
+   ppir_codegen_vec4_mul_op_or  = 0x0A, /* Logical OR */
+   ppir_codegen_vec4_mul_op_xor = 0x0B, /* Logical XOR */
    ppir_codegen_vec4_mul_op_neq = 0x0C, /* Not Equal */
    ppir_codegen_vec4_mul_op_lt  = 0x0D, /* Less Than */
    ppir_codegen_vec4_mul_op_le  = 0x0E, /* Less than or Equal */
@@ -209,6 +212,9 @@ typedef struct __attribute__((__packed__)) {
 
 typedef enum {
    ppir_codegen_float_mul_op_not = 0x08, /* Logical Not */
+   ppir_codegen_float_mul_op_and = 0x09, /* Logical AND */
+   ppir_codegen_float_mul_op_or  = 0x0A, /* Logical OR */
+   ppir_codegen_float_mul_op_xor = 0x0B, /* Logical XOR */
    ppir_codegen_float_mul_op_neq = 0x0C, /* Not Equal */
    ppir_codegen_float_mul_op_lt  = 0x0D, /* Less Than */
    ppir_codegen_float_mul_op_le  = 0x0E, /* Less than or Equal */

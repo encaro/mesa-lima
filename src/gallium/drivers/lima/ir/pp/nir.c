@@ -133,6 +133,9 @@ static int nir_to_ppir_opcodes[nir_num_opcodes] = {
    [nir_op_frcp] = ppir_op_rcp,
    [nir_op_ffloor] = ppir_op_floor,
    [nir_op_ffract] = ppir_op_fract,
+   [nir_op_fand] = ppir_op_and,
+   [nir_op_for] = ppir_op_or,
+   [nir_op_fxor] = ppir_op_xor,
 };
 
 static ppir_node *ppir_emit_alu(ppir_block *block, nir_instr *ni)
