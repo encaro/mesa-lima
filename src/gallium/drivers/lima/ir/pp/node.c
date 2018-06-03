@@ -149,6 +149,13 @@ const ppir_op_info ppir_op_infos[] = {
          PPIR_INSTR_SLOT_END
       },
    },
+   [ppir_op_not] = {
+      .name = "not",
+      .slots = (int []) {
+         PPIR_INSTR_SLOT_ALU_SCL_MUL, PPIR_INSTR_SLOT_ALU_VEC_MUL,
+         PPIR_INSTR_SLOT_END
+      },
+   },
    [ppir_op_lt] = {
       .name = "lt",
    },

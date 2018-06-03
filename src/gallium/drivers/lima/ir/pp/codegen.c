@@ -168,6 +168,9 @@ static void ppir_codegen_encode_vec_mul(ppir_node *node, void *code)
    case ppir_op_ne:
       f->op = ppir_codegen_vec4_mul_op_ne;
       break;
+   case ppir_op_not:
+      f->op = ppir_codegen_vec4_mul_op_not;
+      break;
    default:
       break;
    }
@@ -237,6 +240,9 @@ static void ppir_codegen_encode_scl_mul(ppir_node *node, void *code)
       break;
    case ppir_op_ne:
       f->op = ppir_codegen_float_mul_op_ne;
+      break;
+   case ppir_op_not:
+      f->op = ppir_codegen_float_mul_op_not;
       break;
    default:
       break;
