@@ -149,6 +149,44 @@ const ppir_op_info ppir_op_infos[] = {
          PPIR_INSTR_SLOT_END
       },
    },
+   [ppir_op_lt] = {
+      .name = "lt",
+   },
+   [ppir_op_le] = {
+      .name = "le",
+   },
+   [ppir_op_gt] = {
+      .name = "gt",
+      .slots = (int []) {
+         PPIR_INSTR_SLOT_ALU_SCL_MUL, PPIR_INSTR_SLOT_ALU_SCL_ADD,
+         PPIR_INSTR_SLOT_ALU_VEC_MUL, PPIR_INSTR_SLOT_ALU_VEC_ADD,
+         PPIR_INSTR_SLOT_END
+      },
+   },
+   [ppir_op_ge] = {
+      .name = "ge",
+      .slots = (int []) {
+         PPIR_INSTR_SLOT_ALU_SCL_MUL, PPIR_INSTR_SLOT_ALU_SCL_ADD,
+         PPIR_INSTR_SLOT_ALU_VEC_MUL, PPIR_INSTR_SLOT_ALU_VEC_ADD,
+         PPIR_INSTR_SLOT_END
+      },
+   },
+   [ppir_op_eq] = {
+      .name = "eq",
+      .slots = (int []) {
+         PPIR_INSTR_SLOT_ALU_SCL_MUL, PPIR_INSTR_SLOT_ALU_SCL_ADD,
+         PPIR_INSTR_SLOT_ALU_VEC_MUL, PPIR_INSTR_SLOT_ALU_VEC_ADD,
+         PPIR_INSTR_SLOT_END
+      },
+   },
+   [ppir_op_ne] = {
+      .name = "ne",
+      .slots = (int []) {
+         PPIR_INSTR_SLOT_ALU_SCL_MUL, PPIR_INSTR_SLOT_ALU_SCL_ADD,
+         PPIR_INSTR_SLOT_ALU_VEC_MUL, PPIR_INSTR_SLOT_ALU_VEC_ADD,
+         PPIR_INSTR_SLOT_END
+      },
+   },
    [ppir_op_rcp] = {
       .name = "rcp",
       .slots = (int []) {

@@ -142,9 +142,9 @@ typedef enum {
    ppir_codegen_vec4_mul_op_and = 0x09, /* Logical AND */
    ppir_codegen_vec4_mul_op_or  = 0x0A, /* Logical OR */
    ppir_codegen_vec4_mul_op_xor = 0x0B, /* Logical XOR */
-   ppir_codegen_vec4_mul_op_neq = 0x0C, /* Not Equal */
-   ppir_codegen_vec4_mul_op_lt  = 0x0D, /* Less Than */
-   ppir_codegen_vec4_mul_op_le  = 0x0E, /* Less than or Equal */
+   ppir_codegen_vec4_mul_op_ne  = 0x0C, /* Not Equal */
+   ppir_codegen_vec4_mul_op_gt  = 0x0D, /* Great Than */
+   ppir_codegen_vec4_mul_op_ge  = 0x0E, /* Great than or Equal */
    ppir_codegen_vec4_mul_op_eq  = 0x0F, /* Equal */
    ppir_codegen_vec4_mul_op_min = 0x10, /* Minimum */
    ppir_codegen_vec4_mul_op_max = 0x11, /* Maximum */
@@ -176,9 +176,9 @@ typedef struct __attribute__((__packed__)) {
 typedef enum {
    ppir_codegen_vec4_acc_op_add   = 0x00,
    ppir_codegen_vec4_acc_op_fract = 0x04, /* Fract? */
-   ppir_codegen_vec4_acc_op_neq   = 0x08, /* Not Equal */
-   ppir_codegen_vec4_acc_op_lt    = 0x09, /* Less-Than */
-   ppir_codegen_vec4_acc_op_le    = 0x0A, /* Less-than or Equal */
+   ppir_codegen_vec4_acc_op_ne    = 0x08, /* Not Equal */
+   ppir_codegen_vec4_acc_op_gt    = 0x09, /* Great-Than */
+   ppir_codegen_vec4_acc_op_ge    = 0x0A, /* Great-than or Equal */
    ppir_codegen_vec4_acc_op_eq    = 0x0B, /* Equal */
    ppir_codegen_vec4_acc_op_floor = 0x0C,
    ppir_codegen_vec4_acc_op_ceil  = 0x0D,
@@ -215,9 +215,9 @@ typedef enum {
    ppir_codegen_float_mul_op_and = 0x09, /* Logical AND */
    ppir_codegen_float_mul_op_or  = 0x0A, /* Logical OR */
    ppir_codegen_float_mul_op_xor = 0x0B, /* Logical XOR */
-   ppir_codegen_float_mul_op_neq = 0x0C, /* Not Equal */
-   ppir_codegen_float_mul_op_lt  = 0x0D, /* Less Than */
-   ppir_codegen_float_mul_op_le  = 0x0E, /* Less than or Equal */
+   ppir_codegen_float_mul_op_ne  = 0x0C, /* Not Equal */
+   ppir_codegen_float_mul_op_gt  = 0x0D, /* Great Than */
+   ppir_codegen_float_mul_op_ge  = 0x0E, /* great than or Equal */
    ppir_codegen_float_mul_op_eq  = 0x0F, /* Equal */
    ppir_codegen_float_mul_op_min = 0x10, /* Minimum */
    ppir_codegen_float_mul_op_max = 0x11, /* Maximum */
@@ -240,9 +240,9 @@ typedef struct __attribute__((__packed__)) {
 typedef enum {
    ppir_codegen_float_acc_op_add   = 0x00,
    ppir_codegen_float_acc_op_fract = 0x04,
-   ppir_codegen_float_acc_op_neq   = 0x08, /* Not Equal */
-   ppir_codegen_float_acc_op_lt    = 0x09, /* Less-Than */
-   ppir_codegen_float_acc_op_le    = 0x0A, /* Less-than or Equal */
+   ppir_codegen_float_acc_op_ne    = 0x08, /* Not Equal */
+   ppir_codegen_float_acc_op_gt    = 0x09, /* Great-Than */
+   ppir_codegen_float_acc_op_ge    = 0x0A, /* Great-than or Equal */
    ppir_codegen_float_acc_op_eq    = 0x0B, /* Equal */
    ppir_codegen_float_acc_op_floor = 0x0C,
    ppir_codegen_float_acc_op_ceil  = 0x0D,

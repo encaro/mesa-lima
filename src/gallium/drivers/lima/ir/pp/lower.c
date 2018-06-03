@@ -234,6 +234,21 @@ static bool ppir_lower_vec_to_scalar(ppir_block *block, ppir_node *node)
    return true;
 }
 
+static bool ppir_lower_swap_args(ppir_block *block, ppir_node *node)
+{
+   /* swapped op must be the next op */
+   node->op++;
+
+   assert(node->type == ppir_node_type_alu);
+   ppir_alu_node *alu = ppir_node_to_alu(node);
+   assert(alu->num_src == 2);
+
+   ppir_src tmp = alu->src[0];
+   alu->src[0] = alu->src[1];
+   alu->src[1] = tmp;
+   return true;
+}
+
 static bool ppir_lower_texture(ppir_block *block, ppir_node *node)
 {
    ppir_load_texture_node *load_tex = ppir_node_to_load_texture(node);
@@ -293,6 +308,8 @@ static bool (*ppir_lower_funcs[ppir_op_num])(ppir_block *, ppir_node *) = {
    [ppir_op_rsqrt] = ppir_lower_vec_to_scalar,
    [ppir_op_log2] = ppir_lower_vec_to_scalar,
    [ppir_op_exp2] = ppir_lower_vec_to_scalar,
+   [ppir_op_lt] = ppir_lower_swap_args,
+   [ppir_op_le] = ppir_lower_swap_args,
    [ppir_op_load_texture] = ppir_lower_texture,
 };
 

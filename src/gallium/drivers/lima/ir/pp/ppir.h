@@ -90,7 +90,9 @@ typedef enum {
    ppir_op_or,
    ppir_op_xor,
 
+   ppir_op_lt,
    ppir_op_gt,
+   ppir_op_le,
    ppir_op_ge,
    ppir_op_eq,
    ppir_op_ne,
