@@ -53,11 +53,9 @@ const ppir_op_info ppir_op_infos[] = {
    },
    [ppir_op_neg] = {
       .name = "neg",
-      .slots = (int []) {
-         PPIR_INSTR_SLOT_ALU_SCL_ADD, PPIR_INSTR_SLOT_ALU_SCL_MUL,
-         PPIR_INSTR_SLOT_ALU_VEC_ADD, PPIR_INSTR_SLOT_ALU_VEC_MUL,
-         PPIR_INSTR_SLOT_END
-      },
+   },
+   [ppir_op_abs] = {
+      .name = "abs",
    },
    [ppir_op_dot2] = {
       .name = "dot2",

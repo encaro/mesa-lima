@@ -101,10 +101,10 @@ static void merge_src(ppir_src *dst, ppir_src *src)
    dst->negate = dst->negate ^ src->negate;
 }
 
-static bool ppir_lower_neg(ppir_block *block, ppir_node *node)
+static bool ppir_lower_modifier(ppir_block *block, ppir_node *node)
 {
-   ppir_alu_node *neg = ppir_node_to_alu(node);
-   ppir_dest *dest = &neg->dest;
+   ppir_alu_node *alu = ppir_node_to_alu(node);
+   ppir_dest *dest = &alu->dest;
 
    ppir_node_foreach_succ_safe(node, dep) {
       ppir_node *succ = dep->succ;
@@ -112,12 +112,17 @@ static bool ppir_lower_neg(ppir_block *block, ppir_node *node)
       if (succ->type != ppir_node_type_alu)
          continue;
 
-      ppir_alu_node *alu = ppir_node_to_alu(succ);
-      for (int i = 0; i < alu->num_src; i++) {
-         ppir_src *src = alu->src + i;
+      ppir_alu_node *succ_alu = ppir_node_to_alu(succ);
+      for (int i = 0; i < succ_alu->num_src; i++) {
+         ppir_src *src = succ_alu->src + i;
          if (ppir_node_target_equal(src, dest)) {
-            merge_src(src, neg->src);
-            src->negate = !src->negate;
+            merge_src(src, alu->src);
+            if (node->op == ppir_op_neg)
+               src->negate = !src->negate;
+            else if (node->op == ppir_op_abs)
+               src->absolute = true;
+            else
+               return false;
          }
       }
 
@@ -132,8 +137,13 @@ static bool ppir_lower_neg(ppir_block *block, ppir_node *node)
    if (ppir_node_is_root(node))
       ppir_node_delete(node);
    else {
+      if (node->op == ppir_op_neg)
+         alu->src->negate = !alu->src->negate;
+      else if (node->op == ppir_op_abs)
+         alu->src->absolute = true;
+      else
+         return false;
       node->op = ppir_op_mov;
-      neg->src->negate = !neg->src->negate;
    }
 
    return true;
@@ -348,7 +358,8 @@ static bool (*ppir_lower_funcs[ppir_op_num])(ppir_block *, ppir_node *) = {
    [ppir_op_dot2] = ppir_lower_dot,
    [ppir_op_dot3] = ppir_lower_dot,
    [ppir_op_dot4] = ppir_lower_dot,
-   [ppir_op_neg] = ppir_lower_neg,
+   [ppir_op_neg] = ppir_lower_modifier,
+   [ppir_op_abs] = ppir_lower_modifier,
    [ppir_op_rcp] = ppir_lower_vec_to_scalar,
    [ppir_op_rsqrt] = ppir_lower_vec_to_scalar,
    [ppir_op_log2] = ppir_lower_vec_to_scalar,
