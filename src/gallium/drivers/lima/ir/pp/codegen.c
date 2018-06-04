@@ -306,11 +306,14 @@ static void ppir_codegen_encode_vec_add(ppir_node *node, void *code)
    case ppir_op_ne:
       f->op = ppir_codegen_vec4_acc_op_ne;
       break;
+   case ppir_op_select:
+      f->op = ppir_codegen_vec4_acc_op_sel;
+      break;
    default:
       break;
    }
 
-   ppir_src *src = alu->src;
+   ppir_src *src = node->op == ppir_op_select ? alu->src + 1 : alu->src;
    index = ppir_target_get_src_reg_index(src);
 
    if (src->type == ppir_target_pipeline &&
@@ -323,8 +326,7 @@ static void ppir_codegen_encode_vec_add(ppir_node *node, void *code)
    f->arg0_absolute = src->absolute;
    f->arg0_negate = src->negate;
 
-   if (alu->num_src > 1) {
-      src = alu->src + 1;
+   if (++src < alu->src + alu->num_src) {
       index = ppir_target_get_src_reg_index(src);
       f->arg1_source = index >> 2;
       f->arg1_swizzle = encode_swizzle(src->swizzle, index & 0x3, dest_shift);
@@ -377,11 +379,14 @@ static void ppir_codegen_encode_scl_add(ppir_node *node, void *code)
    case ppir_op_ne:
       f->op = ppir_codegen_float_acc_op_ne;
       break;
+   case ppir_op_select:
+      f->op = ppir_codegen_float_acc_op_sel;
+      break;
    default:
       break;
    }
 
-   ppir_src *src = alu->src;
+   ppir_src *src = node->op == ppir_op_select ? alu->src + 1: alu->src;
    if (src->type == ppir_target_pipeline &&
        src->pipeline == ppir_pipeline_reg_fmul)
       f->mul_in = true;
@@ -390,8 +395,7 @@ static void ppir_codegen_encode_scl_add(ppir_node *node, void *code)
    f->arg0_absolute = src->absolute;
    f->arg0_negate = src->negate;
 
-   if (alu->num_src == 2) {
-      src = alu->src + 1;
+   if (++src < alu->src + alu->num_src) {
       f->arg1_source = get_scl_reg_index(src, dest_component);
       f->arg1_absolute = src->absolute;
       f->arg1_negate = src->negate;

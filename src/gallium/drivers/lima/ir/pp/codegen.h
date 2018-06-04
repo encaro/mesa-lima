@@ -188,7 +188,7 @@ typedef enum {
    ppir_codegen_vec4_acc_op_sum4  = 0x11, /* dest.xyzw = (arg0.x + arg0.y + arg0.z + arg0.w) */
    ppir_codegen_vec4_acc_op_dFdx  = 0x14,
    ppir_codegen_vec4_acc_op_dFdy  = 0x15,
-   ppir_codegen_vec4_acc_op_sel   = 0x17, /* result = (^fmul ? arg1 : arg0) */
+   ppir_codegen_vec4_acc_op_sel   = 0x17, /* result = (^fmul ? arg0 : arg1) */
    ppir_codegen_vec4_acc_op_mov   = 0x1F, /* Passthrough, result = arg0 */
 } ppir_codegen_vec4_acc_op;
 
@@ -250,6 +250,7 @@ typedef enum {
    ppir_codegen_float_acc_op_max   = 0x0F,
    ppir_codegen_float_acc_op_dFdx  = 0x14,
    ppir_codegen_float_acc_op_dFdy  = 0x15,
+   ppir_codegen_float_acc_op_sel   = 0x17, /* result = (^fmul ? arg0 : arg1) */
    ppir_codegen_float_acc_op_mov   = 0x1F, /* Passthrough, result = arg1 */
 } ppir_codegen_float_acc_op;
 

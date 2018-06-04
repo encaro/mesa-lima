@@ -73,25 +73,31 @@ void ppir_instr_insert_mul_node(ppir_node *add, ppir_node *mul)
             int pipeline = pos == PPIR_INSTR_SLOT_ALU_VEC_MUL ?
                ppir_pipeline_reg_vmul : ppir_pipeline_reg_fmul;
 
-            assert(add_alu->num_src < 3);
-
-            if (add_alu->num_src == 2) {
-               bool src0 = ppir_node_target_equal(add_alu->src, dest);
-               bool src1 = ppir_node_target_equal(add_alu->src + 1, dest);
-               /* only one src0 can use ^vmul/^fmul */
-               if (src0 && src1)
+            /* ^vmul/^fmul can't be used as last arg */
+            if (add_alu->num_src > 1) {
+               ppir_src *last_src = add_alu->src + add_alu->num_src - 1;
+               if (ppir_node_target_equal(last_src, dest))
                   return;
-               /* swap src0 and src1 if needed */
-               if (src1) {
-                  ppir_src tmp = add_alu->src[0];
-                  add_alu->src[0] = add_alu->src[1];
-                  add_alu->src[1] = tmp;
-               }
             }
 
             /* update add node src to use pipeline reg */
-            add_alu->src->type = ppir_target_pipeline;
-            add_alu->src->pipeline = pipeline;
+            ppir_src *src = add_alu->src;
+            if (add_alu->num_src == 3) {
+               if (ppir_node_target_equal(src, dest)) {
+                  src->type = ppir_target_pipeline;
+                  src->pipeline = pipeline;
+               }
+
+               if (ppir_node_target_equal(++src, dest)) {
+                  src->type = ppir_target_pipeline;
+                  src->pipeline = pipeline;
+               }
+            }
+            else {
+               assert(ppir_node_target_equal(src, dest));
+               src->type = ppir_target_pipeline;
+               src->pipeline = pipeline;
+            }
 
             /* update mul node dest to output to pipeline reg */
             dest->type = ppir_target_pipeline;

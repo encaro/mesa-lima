@@ -298,6 +298,51 @@ static bool ppir_lower_texture(ppir_block *block, ppir_node *node)
    return true;
 }
 
+/* insert a move as the select condition to make sure it can
+ * be inserted to select instr float mul slot
+ */
+static bool ppir_lower_select(ppir_block *block, ppir_node *node)
+{
+   ppir_alu_node *alu = ppir_node_to_alu(node);
+
+   ppir_node *move = ppir_node_create(block, ppir_op_mov, -1, 0);
+   if (!move)
+      return false;
+   list_addtail(&move->list, &node->list);
+
+   ppir_alu_node *move_alu = ppir_node_to_alu(move);
+   ppir_src *move_src = move_alu->src, *src = alu->src;
+   move_src->type = src->type;
+   move_src->ssa = src->ssa;
+   move_src->swizzle[0] = src->swizzle[0];
+   move_alu->num_src = 1;
+
+   ppir_dest *move_dest = &move_alu->dest;
+   move_dest->type = ppir_target_ssa;
+   move_dest->ssa.num_components = 1;
+   move_dest->ssa.live_in = INT_MAX;
+   move_dest->ssa.live_out = 0;
+   move_dest->write_mask = 1;
+
+   ppir_node_foreach_pred(node, dep) {
+      ppir_node *pred = dep->pred;
+      ppir_dest *dest = ppir_node_get_dest(pred);
+      if (ppir_node_target_equal(alu->src, dest)) {
+         ppir_node_replace_pred(dep, move);
+         ppir_node_add_dep(move, pred);
+      }
+   }
+
+   /* move must be the first pred of select node which make sure
+    * the float mul slot is free when node to instr
+    */
+   assert(ppir_node_first_pred(node) == move);
+
+   src->swizzle[0] = 0;
+   ppir_node_target_assign(alu->src, move_dest);
+   return true;
+}
+
 static bool (*ppir_lower_funcs[ppir_op_num])(ppir_block *, ppir_node *) = {
    [ppir_op_const] = ppir_lower_const,
    [ppir_op_dot2] = ppir_lower_dot,
@@ -311,6 +356,7 @@ static bool (*ppir_lower_funcs[ppir_op_num])(ppir_block *, ppir_node *) = {
    [ppir_op_lt] = ppir_lower_swap_args,
    [ppir_op_le] = ppir_lower_swap_args,
    [ppir_op_load_texture] = ppir_lower_texture,
+   [ppir_op_select] = ppir_lower_select,
 };
 
 bool ppir_lower_prog(ppir_compiler *comp)

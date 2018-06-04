@@ -194,6 +194,13 @@ const ppir_op_info ppir_op_infos[] = {
          PPIR_INSTR_SLOT_END
       },
    },
+   [ppir_op_select] = {
+      .name = "select",
+      .slots = (int []) {
+         PPIR_INSTR_SLOT_ALU_SCL_ADD, PPIR_INSTR_SLOT_ALU_VEC_ADD,
+         PPIR_INSTR_SLOT_END
+      },
+   },
    [ppir_op_rcp] = {
       .name = "rcp",
       .slots = (int []) {
@@ -335,7 +342,7 @@ void ppir_node_replace_pred(ppir_dep *dep, ppir_node *new_pred)
    list_addtail(&dep->succ_link, &new_pred->succ_list);
 }
 
-void ppir_node_replace_succ(ppir_node *dst, ppir_node *src)
+void ppir_node_replace_all_succ(ppir_node *dst, ppir_node *src)
 {
    ppir_node_foreach_succ_safe(src, dep) {
       ppir_node_replace_pred(dep, dst);

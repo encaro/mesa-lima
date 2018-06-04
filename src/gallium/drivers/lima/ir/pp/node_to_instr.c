@@ -65,7 +65,7 @@ static bool insert_to_load_tex(ppir_block *block, ppir_node *load_coords, ppir_n
    ppir_alu_node *alu = ppir_node_to_alu(move);
    alu->dest = *dest;
 
-   ppir_node_replace_succ(move, ldtex);
+   ppir_node_replace_all_succ(move, ldtex);
 
    dest->type = ppir_target_pipeline;
    dest->pipeline = ppir_pipeline_reg_sampler;

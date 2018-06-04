@@ -326,7 +326,7 @@ void ppir_node_remove_dep(ppir_dep *dep);
 void ppir_node_delete(ppir_node *node);
 void ppir_node_print_prog(ppir_compiler *comp);
 void ppir_node_replace_child(ppir_node *parent, ppir_node *old_child, ppir_node *new_child);
-void ppir_node_replace_succ(ppir_node *dst, ppir_node *src);
+void ppir_node_replace_all_succ(ppir_node *dst, ppir_node *src);
 void ppir_node_replace_pred(ppir_dep *dep, ppir_node *new_pred);
 
 static inline bool ppir_node_is_root(ppir_node *node)
