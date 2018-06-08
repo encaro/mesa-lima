@@ -887,18 +887,16 @@ lima_update_varying(struct lima_context *ctx, const struct pipe_draw_info *info)
    int offset = 0;
    for (int i = 1; i < vs->num_varying; i++) {
       struct lima_varying_info *v = vs->varying + i;
+      int size = v->component_size * 4;
 
-      v->components = align(v->components, 2);
-
-      int size = v->components * v->component_size;
-      size = align(size, 8);
-      if (size == 16)
+      /* does component_size == 2 need to be 16 aligned? */
+      if (v->component_size == 4)
          offset = align(offset, 16);
 
       v->offset = offset;
       offset += size;
    }
-   vs->varying_stride = align(offset, 8);
+   vs->varying_stride = align(offset, 16);
 
    if (vs->num_varying > 1)
       lima_ctx_buff_alloc(ctx, lima_ctx_buff_sh_varying,
