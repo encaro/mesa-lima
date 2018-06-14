@@ -90,22 +90,26 @@ lima_update_tex_desc(struct lima_context *ctx, struct lima_sampler_state *sample
    struct pipe_resource *prsc = texture->base.texture;
    struct lima_resource *lima_res = lima_resource(prsc);
 
-   /* TODO: - do we need to align width/height to 16?
-            - does hardware support stride different from width? */
    width = prsc->width0;
    height = prsc->height0;
 
-   if (lima_res->tiled)
-      layout = 3;
-   else
-      layout = 0;
-
    desc[0] = pipe_format_to_lima(prsc->format);
-
    /* 2D texture */
    desc[1] = 0x400;
    desc[2] = (width << 22);
    desc[3] = 0x10000 | (height << 3) | (width >> 10);
+
+   if (lima_res->tiled)
+      layout = 3;
+   else {
+      /* for padded linear texture */
+      if (lima_res->width != width) {
+         desc[0] |= lima_res->width << 18;
+         desc[2] |= 0x100;
+      }
+      layout = 0;
+   }
+
    desc[6] = layout << 13;
 
    lima_submit_add_bo(ctx->pp_submit, lima_res->bo, LIMA_SUBMIT_BO_READ);

@@ -111,6 +111,7 @@ lima_resource_create_bo(struct pipe_screen *pscreen,
    /* TODO: mipmap */
    pres = &res->base;
    res->tiled = should_tile;
+   res->width = width;
    res->stride = util_format_get_stride(pres->format, width);
 
    uint32_t size = res->stride *
@@ -229,7 +230,11 @@ lima_resource_from_handle(struct pipe_screen *pscreen,
          lima_resource_destroy(pscreen, pres);
          return NULL;
       }
+
+      res->width = width;
    }
+   else
+      res->width = pres->width0;
 
    return pres;
 }
