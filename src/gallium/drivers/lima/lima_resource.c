@@ -28,6 +28,7 @@
 #include "util/u_math.h"
 #include "util/u_debug.h"
 #include "util/u_transfer.h"
+#include "util/u_surface.h"
 #include "util/hash_table.h"
 #include "renderonly/renderonly.h"
 
@@ -474,6 +475,12 @@ lima_transfer_unmap(struct pipe_context *pctx,
 }
 
 static void
+lima_blit(struct pipe_context *pctx, const struct pipe_blit_info *blit_info)
+{
+   debug_checkpoint();
+}
+
+static void
 lima_flush_resource(struct pipe_context *pctx, struct pipe_resource *resource)
 {
    debug_checkpoint();
@@ -492,6 +499,9 @@ lima_resource_context_init(struct lima_context *ctx)
    ctx->base.transfer_map = lima_transfer_map;
    ctx->base.transfer_flush_region = lima_transfer_flush_region;
    ctx->base.transfer_unmap = lima_transfer_unmap;
+
+   ctx->base.resource_copy_region = util_resource_copy_region;
+   ctx->base.blit = lima_blit;
 
    ctx->base.flush_resource = lima_flush_resource;
 }

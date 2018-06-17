@@ -38,6 +38,7 @@ struct lima_context_framebuffer {
    int shift_w, shift_h;
    int block_w, block_h;
    int shift_max;
+   int samples;
 };
 
 struct lima_context_clear {

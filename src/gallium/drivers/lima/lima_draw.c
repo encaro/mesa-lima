@@ -708,6 +708,8 @@ lima_pack_render_state(struct lima_context *ctx)
 
    /* need more investigation */
    render->multi_sample = 0x0000F807;
+   if (ctx->framebuffer.samples)
+      render->multi_sample |= 0x68;
 
    render->shader_address =
       ctx->fs->bo->va | (((uint32_t *)ctx->fs->bo->map)[0] & 0x1F);
