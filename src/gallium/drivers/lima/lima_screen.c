@@ -249,7 +249,7 @@ lima_screen_is_format_supported(struct pipe_screen *pscreen,
    }
 
    /* be able to support 16, now limit to 4 */
-   if (sample_count > 4)
+   if (sample_count > 1 && sample_count != 4)
       return FALSE;
 
    if (usage & PIPE_BIND_RENDER_TARGET) {

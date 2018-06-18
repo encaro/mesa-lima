@@ -1055,12 +1055,15 @@ lima_pack_pp_frame_reg(struct lima_context *ctx, uint32_t *frame_reg,
    frame->clear_value_color_2 = ctx->clear.color;
    frame->clear_value_color_3 = ctx->clear.color;
    frame->one = 1;
+
+   /* related with MSAA and different value when r4p0/r7p0 */
    frame->supersampled_height = ctx->framebuffer.height * 2 - 1;
+   frame->scale = 0xE0C;
+
    frame->dubya = 0x77;
    frame->onscreen = 1;
    frame->blocking = (ctx->framebuffer.shift_max << 28) |
       (ctx->framebuffer.shift_h << 16) | ctx->framebuffer.shift_w;
-   frame->scale = 0xE0C;
    frame->foureight = 0x8888;
 
    struct lima_pp_wb_reg *wb = (void *)wb_reg;
