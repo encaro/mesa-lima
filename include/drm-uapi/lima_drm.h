@@ -1,24 +1,6 @@
-/*
- * Copyright (C) 2017 Lima Project
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
- * THE COPYRIGHT HOLDER(S) OR AUTHOR(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- */
+/* SPDX-License-Identifier: (GPL-2.0 WITH Linux-syscall-note) OR MIT */
+/* Copyright 2017-2018 Qiang Yu <yuq825@gmail.com> */
+
 #ifndef __LIMA_DRM_H__
 #define __LIMA_DRM_H__
 
@@ -170,6 +152,15 @@ struct drm_lima_ctx {
 	__u32 id;          /* in/out */
 };
 
+#define LIMA_GEM_MOD_OP_GET 0
+#define LIMA_GEM_MOD_OP_SET 1
+
+struct drm_lima_gem_mod {
+	__u32 handle;      /* in */
+	__u32 op;          /* in */
+	__u64 modifier;    /* in/out */
+};
+
 #define DRM_LIMA_INFO        0x00
 #define DRM_LIMA_GEM_CREATE  0x01
 #define DRM_LIMA_GEM_INFO    0x02
@@ -178,6 +169,7 @@ struct drm_lima_ctx {
 #define DRM_LIMA_WAIT_FENCE  0x05
 #define DRM_LIMA_GEM_WAIT    0x06
 #define DRM_LIMA_CTX         0x07
+#define DRM_LIMA_GEM_MOD     0x08
 
 #define DRM_IOCTL_LIMA_INFO DRM_IOR(DRM_COMMAND_BASE + DRM_LIMA_INFO, struct drm_lima_info)
 #define DRM_IOCTL_LIMA_GEM_CREATE DRM_IOWR(DRM_COMMAND_BASE + DRM_LIMA_GEM_CREATE, struct drm_lima_gem_create)
@@ -187,6 +179,7 @@ struct drm_lima_ctx {
 #define DRM_IOCTL_LIMA_WAIT_FENCE DRM_IOW(DRM_COMMAND_BASE + DRM_LIMA_WAIT_FENCE, struct drm_lima_wait_fence)
 #define DRM_IOCTL_LIMA_GEM_WAIT DRM_IOW(DRM_COMMAND_BASE + DRM_LIMA_GEM_WAIT, struct drm_lima_gem_wait)
 #define DRM_IOCTL_LIMA_CTX DRM_IOWR(DRM_COMMAND_BASE + DRM_LIMA_CTX, struct drm_lima_ctx)
+#define DRM_IOCTL_LIMA_GEM_MOD DRM_IOWR(DRM_COMMAND_BASE + DRM_LIMA_GEM_MOD, struct drm_lima_gem_mod)
 
 #if defined(__cplusplus)
 }
