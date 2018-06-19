@@ -76,7 +76,6 @@ lima_resource_create_scanout(struct pipe_screen *pscreen,
 
    struct lima_resource *res = lima_resource(pres);
    res->scanout = scanout;
-   res->tiled = false;
 
    return pres;
 }
@@ -89,23 +88,10 @@ lima_resource_create_bo(struct pipe_screen *pscreen,
    struct lima_screen *screen = lima_screen(pscreen);
    struct lima_resource *res;
    struct pipe_resource *pres;
-   bool should_tile = true;
 
    res = CALLOC_STRUCT(lima_resource);
    if (!res)
       return NULL;
-
-   /* VBOs/PBOs are untiled (and 1 height). */
-   if (templat->target == PIPE_BUFFER)
-      should_tile = false;
-
-   if (templat->bind & PIPE_BIND_LINEAR)
-      should_tile = false;
-
-   if (should_tile) {
-      width = align(width, 16);
-      height = align(height, 16);
-   }
 
    res->base = *templat;
    res->base.screen = pscreen;
@@ -113,7 +99,6 @@ lima_resource_create_bo(struct pipe_screen *pscreen,
 
    /* TODO: mipmap */
    pres = &res->base;
-   res->tiled = should_tile;
    res->width = width;
    res->stride = util_format_get_stride(pres->format, width);
 
@@ -131,14 +116,46 @@ lima_resource_create_bo(struct pipe_screen *pscreen,
    return pres;
 }
 
+static bool
+is_modifier_ok(const uint64_t *modifiers, int count, uint64_t mod)
+{
+   if (!count)
+      return true;
+
+   for (int i = 0; i < count; i++) {
+      if (modifiers[i] == mod)
+         return true;
+   }
+
+   return false;
+}
+
 static struct pipe_resource *
-lima_resource_create(struct pipe_screen *pscreen,
-                     const struct pipe_resource *templat)
+_lima_resource_create_with_modifiers(struct pipe_screen *pscreen,
+                                     const struct pipe_resource *templat,
+                                     const uint64_t *modifiers,
+                                     int count)
 {
    struct lima_screen *screen = lima_screen(pscreen);
+   bool should_tile = true;
    unsigned width, height;
 
-   if (templat->bind & PIPE_BIND_RENDER_TARGET) {
+   /* VBOs/PBOs are untiled (and 1 height). */
+   if (templat->target == PIPE_BUFFER)
+      should_tile = false;
+
+   if (templat->bind & (PIPE_BIND_LINEAR | PIPE_BIND_SCANOUT))
+      should_tile = false;
+
+   /* if tiled buffer is not allowed, fallback to linear buffer */
+   if (should_tile && !is_modifier_ok(modifiers, count, DRM_FORMAT_MOD_ARM_TILED))
+      should_tile = false;
+
+   /* if linear buffer is not allowd, alloc fail */
+   if (!should_tile && !is_modifier_ok(modifiers, count, DRM_FORMAT_MOD_LINEAR))
+      return NULL;
+
+   if (should_tile || (templat->bind & PIPE_BIND_RENDER_TARGET)) {
       width = align(templat->width0, 16);
       height = align(templat->height0, 16);
    }
@@ -148,36 +165,47 @@ lima_resource_create(struct pipe_screen *pscreen,
    }
 
    struct pipe_resource *pres;
-   if (screen->ro && templat->bind & PIPE_BIND_SCANOUT)
+   if (screen->ro && (templat->bind & PIPE_BIND_SCANOUT))
       pres = lima_resource_create_scanout(pscreen, templat, width, height);
    else
       pres = lima_resource_create_bo(pscreen, templat, width, height);
 
-   if (!pres)
-      return NULL;
+   if (pres) {
+      struct lima_resource *res = lima_resource(pres);
+      res->tiled = should_tile;
 
-   debug_printf("%s: pres=%p width=%u height=%u depth=%u target=%d bind=%x usage=%d\n",
-                __func__, pres, pres->width0, pres->height0, pres->depth0,
-                pres->target, pres->bind, pres->usage);
-
+      debug_printf("%s: pres=%p width=%u height=%u depth=%u target=%d "
+                   "bind=%x usage=%d tile=%d\n", __func__,
+                   pres, pres->width0, pres->height0, pres->depth0,
+                   pres->target, pres->bind, pres->usage, should_tile);
+   }
    return pres;
 }
 
 static struct pipe_resource *
+lima_resource_create(struct pipe_screen *pscreen,
+                     const struct pipe_resource *templat)
+{
+   return _lima_resource_create_with_modifiers(pscreen, templat, NULL, 0);
+}
+
+static struct pipe_resource *
 lima_resource_create_with_modifiers(struct pipe_screen *pscreen,
-                                   const struct pipe_resource *templat,
-                                   const uint64_t *modifiers,
-                                   int count)
+                                    const struct pipe_resource *templat,
+                                    const uint64_t *modifiers,
+                                    int count)
 {
    struct pipe_resource tmpl = *templat;
 
-   /*
-    * We currently assume that all buffers allocated through this interface
-    * should be scanout enabled.
+   /* gbm_bo_create_with_modifiers & gbm_surface_create_with_modifiers
+    * don't have usage parameter, but buffer created by these functions
+    * may be used for scanout. So we assume buffer created by this
+    * function always enable scanout if linear modifier is permitted.
     */
-   tmpl.bind |= PIPE_BIND_SCANOUT;
+   if (is_modifier_ok(modifiers, count, DRM_FORMAT_MOD_LINEAR))
+      tmpl.bind |= PIPE_BIND_SCANOUT;
 
-   return lima_resource_create(pscreen, &tmpl);
+   return _lima_resource_create_with_modifiers(pscreen, &tmpl, modifiers, count);
 }
 
 static void
