@@ -174,6 +174,11 @@ _lima_resource_create_with_modifiers(struct pipe_screen *pscreen,
       struct lima_resource *res = lima_resource(pres);
       res->tiled = should_tile;
 
+      if (should_tile)
+         lima_bo_set_modifier(res->bo, DRM_FORMAT_MOD_ARM_TILED);
+      else
+         lima_bo_set_modifier(res->bo, DRM_FORMAT_MOD_LINEAR);
+
       debug_printf("%s: pres=%p width=%u height=%u depth=%u target=%d "
                    "bind=%x usage=%d tile=%d\n", __func__,
                    pres, pres->width0, pres->height0, pres->depth0,
@@ -258,8 +263,7 @@ lima_resource_from_handle(struct pipe_screen *pscreen,
 
       if (res->stride != stride || res->bo->size < size) {
          debug_error("import buffer not properly aligned\n");
-         lima_resource_destroy(pscreen, pres);
-         return NULL;
+         goto err_out;
       }
 
       res->width = width;
@@ -267,7 +271,34 @@ lima_resource_from_handle(struct pipe_screen *pscreen,
    else
       res->width = pres->width0;
 
+   uint64_t modifier;
+   lima_bo_get_modifier(res->bo, &modifier);
+   if (modifier == DRM_FORMAT_MOD_INVALID) {
+      if (handle->modifier == DRM_FORMAT_MOD_INVALID)
+         handle->modifier = DRM_FORMAT_MOD_LINEAR;
+      lima_bo_set_modifier(res->bo, handle->modifier);
+   }
+   else {
+      if (handle->modifier == DRM_FORMAT_MOD_INVALID)
+         handle->modifier = modifier;
+      else if (handle->modifier != modifier) {
+         debug_error("import buffer modifier mismatch\n");
+         goto err_out;
+      }
+   }
+
+   if (handle->modifier == DRM_FORMAT_MOD_ARM_TILED)
+      res->tiled = true;
+   else if (handle->modifier != DRM_FORMAT_MOD_LINEAR) {
+      debug_error("import buffer with unsupport modifier\n");
+      goto err_out;
+   }
+
    return pres;
+
+err_out:
+   lima_resource_destroy(pscreen, pres);
+   return NULL;
 }
 
 static boolean
