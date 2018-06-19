@@ -34,6 +34,8 @@
 
 #include "state_tracker/drm_driver.h"
 
+#include "drm_fourcc.h"
+
 #include "lima_screen.h"
 #include "lima_context.h"
 #include "lima_resource.h"
@@ -248,6 +250,11 @@ lima_resource_get_handle(struct pipe_screen *pscreen,
 {
    struct lima_screen *screen = lima_screen(pscreen);
    struct lima_resource *res = lima_resource(pres);
+
+   if (res->tiled)
+      handle->modifier = DRM_FORMAT_MOD_ARM_TILED;
+   else
+      handle->modifier = DRM_FORMAT_MOD_LINEAR;
 
    if (handle->type == DRM_API_HANDLE_TYPE_KMS && screen->ro &&
        renderonly_get_handle(res->scanout, handle))
