@@ -271,7 +271,7 @@ lima_resource_from_handle(struct pipe_screen *pscreen,
    else
       res->width = pres->width0;
 
-   uint64_t modifier;
+   uint64_t modifier = DRM_FORMAT_MOD_INVALID;
    lima_bo_get_modifier(res->bo, &modifier);
    if (modifier == DRM_FORMAT_MOD_INVALID) {
       if (handle->modifier == DRM_FORMAT_MOD_INVALID)
