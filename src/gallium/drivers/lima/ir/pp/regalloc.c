@@ -161,7 +161,7 @@ static ppir_reg *ppir_regalloc_build_liveness_info(ppir_compiler *comp)
             continue;
          }
 
-         if (!node->instr)
+         if (!node->instr || node->op == ppir_op_const)
             continue;
 
          /* update reg live_in from node dest (write) */
