@@ -350,7 +350,7 @@ static ppir_node *(*ppir_emit_instr[nir_instr_type_phi])(ppir_block *, nir_instr
 
 static ppir_block *ppir_block_create(ppir_compiler *comp)
 {
-   ppir_block *block = ralloc(comp, ppir_block);
+   ppir_block *block = rzalloc(comp, ppir_block);
    if (!block)
       return NULL;
 
@@ -463,6 +463,7 @@ bool ppir_compile_nir(struct lima_fs_shader_state *prog, struct nir_shader *nir,
       r->num_components = reg->num_components;
       r->live_in = INT_MAX;
       r->live_out = 0;
+      r->is_head = false;
       list_addtail(&r->list, &comp->reg_list);
    }
 

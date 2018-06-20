@@ -159,6 +159,7 @@ static ppir_reg *create_reg(ppir_compiler *comp, int num_components)
    r->num_components = num_components;
    r->live_in = INT_MAX;
    r->live_out = 0;
+   r->is_head = false;
    list_addtail(&r->list, &comp->reg_list);
 
    return r;
