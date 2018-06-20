@@ -195,12 +195,11 @@ static bool ppir_do_node_to_instr(ppir_block *block, ppir_node *node)
           ppir_node_has_single_succ(node)) {
          ppir_node *succ = ppir_node_first_succ(node);
          if (succ->instr_pos == PPIR_INSTR_SLOT_ALU_VEC_ADD) {
-            assert(alu->dest.ssa.num_components > 1);
             node->instr_pos = PPIR_INSTR_SLOT_ALU_VEC_MUL;
             ppir_instr_insert_mul_node(succ, node);
          }
-         else if (succ->instr_pos == PPIR_INSTR_SLOT_ALU_SCL_ADD) {
-            assert(alu->dest.ssa.num_components == 1);
+         else if (succ->instr_pos == PPIR_INSTR_SLOT_ALU_SCL_ADD &&
+                  alu->dest.ssa.num_components == 1) {
             node->instr_pos = PPIR_INSTR_SLOT_ALU_SCL_MUL;
             ppir_instr_insert_mul_node(succ, node);
          }
