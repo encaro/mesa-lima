@@ -180,6 +180,9 @@ get_vertex_shader_param(struct lima_screen *screen,
    case PIPE_SHADER_CAP_PREFERRED_IR:
       return PIPE_SHADER_IR_NIR;
 
+   case PIPE_SHADER_CAP_MAX_TEMPS:
+      return 256; /* need investigate */
+
    default:
       return 0;
    }
@@ -209,6 +212,9 @@ get_fragment_shader_param(struct lima_screen *screen,
 
    case PIPE_SHADER_CAP_PREFERRED_IR:
       return PIPE_SHADER_IR_NIR;
+
+   case PIPE_SHADER_CAP_MAX_TEMPS:
+      return 256; /* need investigate */
 
    default:
       return 0;
