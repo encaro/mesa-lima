@@ -28,6 +28,8 @@
 #include "util/u_debug.h"
 #include "renderonly/renderonly.h"
 
+#include "drm_fourcc.h"
+
 #include "lima_screen.h"
 #include "lima_context.h"
 #include "lima_resource.h"
@@ -350,6 +352,30 @@ lima_screen_query_info(struct lima_screen *screen)
    return true;
 }
 
+static void
+lima_screen_query_dmabuf_modifiers(struct pipe_screen *pscreen,
+                                   enum pipe_format format, int max,
+                                   uint64_t *modifiers,
+                                   unsigned int *external_only,
+                                   int *count)
+{
+   uint64_t available_modifiers[] = {
+      DRM_FORMAT_MOD_ARM_TILED,
+      DRM_FORMAT_MOD_LINEAR,
+   };
+
+   if (!modifiers) {
+      *count = ARRAY_SIZE(available_modifiers);
+      return;
+   }
+
+   for (int i = 0; i < *count; i++) {
+      modifiers[i] = available_modifiers[i];
+      if (external_only)
+         external_only = false;
+   }
+}
+
 bool lima_shader_debug_gp = false;
 bool lima_shader_debug_pp = false;
 
@@ -459,6 +485,7 @@ lima_screen_create(int fd, struct renderonly *ro)
    screen->base.context_create = lima_context_create;
    screen->base.is_format_supported = lima_screen_is_format_supported;
    screen->base.get_compiler_options = lima_screen_get_compiler_options;
+   screen->base.query_dmabuf_modifiers = lima_screen_query_dmabuf_modifiers;
 
    lima_resource_screen_init(screen);
    lima_fence_screen_init(screen);
