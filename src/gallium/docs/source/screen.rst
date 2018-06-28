@@ -420,6 +420,7 @@ The integer capabilities:
   by the driver, and the driver can throw assertion failures.
 * ``PIPE_CAP_PACKED_UNIFORMS``: True if the driver supports packed uniforms
   as opposed to padding to vec4s.
+* ``PIPE_CAP_BUFFER_AGE``: True if the driver wants to expose EGL/GLX_EXT_buffer_age.
 
 
 .. _pipe_capf:

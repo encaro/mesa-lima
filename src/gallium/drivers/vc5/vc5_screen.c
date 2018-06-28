@@ -110,6 +110,7 @@ vc5_screen_get_param(struct pipe_screen *pscreen, enum pipe_cap param)
         case PIPE_CAP_DRAW_INDIRECT:
         case PIPE_CAP_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION:
         case PIPE_CAP_SIGNED_VERTEX_BUFFER_OFFSET:
+        case PIPE_CAP_BUFFER_AGE:
                 return 1;
 
         case PIPE_CAP_INDEP_BLEND_ENABLE:
