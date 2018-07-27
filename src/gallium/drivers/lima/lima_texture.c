@@ -75,7 +75,7 @@ static uint32_t pipe_format_to_lima(enum pipe_format pformat)
       break;
    default:
       assert(0);
-      break;
+      return 0;
    }
 
    return (swap_chans << 7) | (flag1 << 6) | format;
