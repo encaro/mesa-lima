@@ -1267,7 +1267,7 @@ _lima_flush(struct lima_context *ctx, bool save_state)
    }
 
    if (screen->gpu_type == LIMA_INFO_GPU_MALI400) {
-      struct drm_lima_m400_pp_frame pp_frame = {0};
+      struct drm_lima_m400_pp_frame pp_frame = {{0}};
       lima_pack_pp_frame_reg(ctx, pp_frame.frame, pp_frame.wb);
       pp_frame.num_pp = screen->num_pp;
 
@@ -1282,7 +1282,7 @@ _lima_flush(struct lima_context *ctx, bool save_state)
          fprintf(stderr, "pp submit error\n");
    }
    else {
-      struct drm_lima_m450_pp_frame pp_frame = {0};
+      struct drm_lima_m450_pp_frame pp_frame = {{0}};
       lima_pack_pp_frame_reg(ctx, pp_frame.frame, pp_frame.wb);
 
       struct lima_context_framebuffer *fb = &ctx->framebuffer;
