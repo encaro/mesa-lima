@@ -386,6 +386,7 @@ static bool gpir_lower_eq_ne(gpir_block *block, gpir_node *node)
          break;
       default:
          assert(0);
+      return 0;
    }
 
    gpir_alu_node *e = gpir_node_to_alu(node);
